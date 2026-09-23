@@ -94,9 +94,11 @@ export interface CardboardSet {
 
 /**
  * Branded Tujjor Express cardboard: kraft base + fibre noise + print + tape + label + barcode.
- * `variant` 0 = branded face, 1 = plain side (still kraft), 2 = plain with "fragile" arrows.
+ * `variant` 0 = branded face, 1 = plain side (still kraft), 2 = plain with "fragile" arrows,
+ * 3 = closed top (flap seam + tape across the middle — what the 4 closed flaps of the dynamic box look like).
  */
-export function cardboardTextures(size = 1024, variant: 0 | 1 | 2 = 0): CardboardSet {
+export type CardboardVariant = 0 | 1 | 2 | 3
+export function cardboardTextures(size = 1024, variant: CardboardVariant = 0): CardboardSet {
   return memo(`cardboard-${size}-${variant}`, () => {
     const c = canvas(size)
     const g = c.getContext('2d')!
@@ -191,11 +193,27 @@ export function cardboardTextures(size = 1024, variant: 0 | 1 | 2 = 0): Cardboar
       g.font = `700 ${44 * s}px "Inter", sans-serif`
       g.fillText('FRAGILE · HANDLE WITH CARE', 200 * s, 660 * s)
     }
-    // packing tape strip across the top (all variants: it's the closing seam)
-    g.fillStyle = 'rgba(214,188,140,0.55)'
-    g.fillRect(0, 0, size, 46 * s)
-    g.fillStyle = 'rgba(255,255,255,0.10)'
-    g.fillRect(0, 12 * s, size, 3 * s)
+    if (variant === 3) {
+      // closed flaps seen from above: seam across the middle, flap edge shading, tape along the seam
+      g.fillStyle = 'rgba(40,26,12,0.55)'
+      g.fillRect(0, size / 2 - 2 * s, size, 4 * s)
+      const sh = g.createLinearGradient(0, size / 2 - 40 * s, 0, size / 2 + 40 * s)
+      sh.addColorStop(0, 'rgba(0,0,0,0)')
+      sh.addColorStop(0.5, 'rgba(0,0,0,0.18)')
+      sh.addColorStop(1, 'rgba(0,0,0,0)')
+      g.fillStyle = sh
+      g.fillRect(0, size / 2 - 40 * s, size, 80 * s)
+      g.fillStyle = 'rgba(214,188,140,0.55)'
+      g.fillRect(0, size / 2 - 23 * s, size, 46 * s)
+      g.fillStyle = 'rgba(255,255,255,0.10)'
+      g.fillRect(0, size / 2 - 11 * s, size, 3 * s)
+    } else {
+      // packing tape strip across the top (it's the closing seam)
+      g.fillStyle = 'rgba(214,188,140,0.55)'
+      g.fillRect(0, 0, size, 46 * s)
+      g.fillStyle = 'rgba(255,255,255,0.10)'
+      g.fillRect(0, 12 * s, size, 3 * s)
+    }
 
     const map = new THREE.CanvasTexture(c)
     map.colorSpace = THREE.SRGBColorSpace
@@ -221,6 +239,38 @@ export function cardboardTextures(size = 1024, variant: 0 | 1 | 2 = 0): Cardboar
     rg.putImageData(rimg, 0, 0)
     const roughnessMap = new THREE.CanvasTexture(rc)
     return { map, normalMap, roughnessMap }
+  })
+}
+
+/**
+ * 3-tile horizontal atlas of the cardboard variants (0 brand | 2 arrows | 1 plain) so a whole box is ONE
+ * draw call: map + normal + roughness at tile width `size`. Used by TujjorBox (static mode) and MiniBox (flat).
+ */
+export function cardboardAtlas(size = 512): CardboardSet & { tile: (variant: CardboardVariant) => [number, number] } {
+  return memo(`cardboard-atlas-${size}`, () => {
+    const order: CardboardVariant[] = [0, 2, 1, 3]
+    const sets = order.map((v) => cardboardTextures(size, v))
+    const pack = (pick: (s: CardboardSet) => THREE.Texture, colorSpace: THREE.ColorSpace) => {
+      const c = document.createElement('canvas')
+      c.width = size * 4
+      c.height = size
+      const g = c.getContext('2d')!
+      sets.forEach((set, i) => g.drawImage(pick(set).image as CanvasImageSource, i * size, 0, size, size))
+      const t = new THREE.CanvasTexture(c)
+      t.colorSpace = colorSpace
+      t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping
+      t.anisotropy = 4
+      return t
+    }
+    const map = pack((s) => s.map, THREE.SRGBColorSpace)
+    const normalMap = pack((s) => s.normalMap, THREE.NoColorSpace)
+    const roughnessMap = pack((s) => s.roughnessMap, THREE.NoColorSpace)
+    // tile u-range for a variant
+    const tile = (variant: CardboardVariant): [number, number] => {
+      const i = order.indexOf(variant)
+      return [i / 4, (i + 1) / 4]
+    }
+    return { map, normalMap, roughnessMap, tile }
   })
 }
 

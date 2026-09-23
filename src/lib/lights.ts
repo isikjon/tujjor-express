@@ -23,7 +23,16 @@ export interface PointPreset {
 }
 export interface LightPreset {
   hemi: { sky: string; ground: string; intensity: number }
-  key: { position: [number, number, number]; target: [number, number, number]; intensity: number; color?: string }
+  key: {
+    position: [number, number, number]
+    target: [number, number, number]
+    intensity: number
+    color?: string
+    /** orthographic shadow frustum half-size around the target (tight bounds = sharper, cheaper shadows); default 22 */
+    shadowSize?: number
+    /** shadow camera far distance; default 80 */
+    shadowFar?: number
+  }
   spots: [SpotPreset, SpotPreset, SpotPreset, SpotPreset]
   points: [PointPreset, PointPreset]
   fog: { color: string; density: number }

@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { COMPANY } from '@/config/company'
 
+export const dynamic = 'force-static'
 export const alt = 'Tujjor Express Chirchiq — карго из Китая в Узбекистан'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'

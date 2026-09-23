@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePath } from '@/hooks/usePath'
 import { COMPANY } from '@/config/company'
 import { useApp } from '@/lib/stores'
 import { useT } from '@/translations'
@@ -10,6 +10,7 @@ import { MagneticButton } from './MagneticButton'
 import { SoundToggle } from './SoundToggle'
 import { TransitionLink } from './TransitionLink'
 import { LangSwitch } from './LangSwitch'
+import { MotionToggle } from './MotionToggle'
 
 const NAV: { href: string; key: 'services' | 'business' | 'tracking' | 'contacts' }[] = [
   { href: '/services', key: 'services' },
@@ -21,7 +22,7 @@ const NAV: { href: string; key: 'services' | 'business' | 'tracking' | 'contacts
 /** Always-available header: navigation, CTAs and sound. Stays reachable during the whole story. */
 export function Header() {
   const t = useT()
-  const pathname = usePathname()
+  const pathname = usePath()
   const phase = useApp((s) => s.phase)
   const menuOpen = useApp((s) => s.menuOpen)
   const setMenuOpen = useApp((s) => s.setMenuOpen)
@@ -54,7 +55,7 @@ export function Header() {
         className={`mx-auto flex h-full max-w-[1800px] items-center justify-between px-[var(--gutter)] transition-colors duration-500 ${scrolled ? '[&>*]:drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]' : ''}`}
       >
         <Logo className="mr-6" />
-        <nav aria-label="Основная навигация" className="hidden items-center gap-7 xl:flex">
+        <nav aria-label="Основная навигация" className="hidden items-center gap-6 xl:flex">
           {NAV.map((n) => {
             const active = pathname === n.href
             return (
@@ -75,8 +76,9 @@ export function Header() {
           })}
         </nav>
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden items-center gap-2 lg:flex">
+          <div className="hidden items-center gap-2 lg:flex xl:hidden 2xl:flex">
             <SoundToggle />
+            <MotionToggle className="hidden 2xl:inline-flex" />
             <LangSwitch />
           </div>
           <MagneticButton variant="ghost" href={COMPANY.telegramHref} className="hidden md:inline-flex !px-4 !py-2.5 !text-[11px]">
@@ -123,8 +125,9 @@ export function Header() {
           ))}
         </nav>
         <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <SoundToggle />
+            <MotionToggle />
             <LangSwitch />
           </div>
           <div className="flex flex-wrap gap-2">

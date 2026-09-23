@@ -51,9 +51,27 @@ export function InnerPage({ title, h1, lead, children, crumbs }: { title: string
     </main>
   )
 }
+/** Card with a subtle perspective tilt following the pointer (docs §31 micro-interactions). */
 export function InfoCard({ index, title, text }: { index: number; title: string; text: string }) {
+  const onMove = (e: React.MouseEvent<HTMLElement>) => {
+    const el = e.currentTarget
+    const r = el.getBoundingClientRect()
+    const x = (e.clientX - r.left) / r.width - 0.5
+    const y = (e.clientY - r.top) / r.height - 0.5
+    el.style.transform = `perspective(900px) rotateX(${(-y * 6).toFixed(2)}deg) rotateY(${(x * 8).toFixed(2)}deg) translateY(-2px)`
+    el.style.setProperty('--mx', `${(x + 0.5) * 100}%`)
+    el.style.setProperty('--my', `${(y + 0.5) * 100}%`)
+  }
+  const onLeave = (e: React.MouseEvent<HTMLElement>) => {
+    e.currentTarget.style.transform = ''
+  }
   return (
-    <article className="glass group rounded-2xl p-6 transition-transform duration-500 ease-[var(--ease-out-expo)] hover:-translate-y-0.5 md:p-7" data-cursor="explore">
+    <article
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      className="glass group relative overflow-hidden rounded-2xl p-6 transition-transform duration-300 ease-[var(--ease-out-expo)] will-change-transform md:p-7 before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(400px_circle_at_var(--mx,50%)_var(--my,50%),rgba(255,106,0,0.10),transparent_60%)] before:opacity-0 before:transition-opacity before:duration-500 hover:before:opacity-100"
+      data-cursor="explore"
+    >
       <p className="hud mb-3 text-[10px] text-orange">{String(index).padStart(2, '0')}</p>
       <h2 className="font-display text-[20px] font-bold uppercase leading-tight text-bone md:text-[22px]">{title}</h2>
       <p className="mt-3 text-[14px] leading-relaxed text-bone/65 md:text-[15px]">{text}</p>

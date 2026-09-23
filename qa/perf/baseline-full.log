@@ -1,0 +1,60 @@
+hero        baseline    35.9 fps  frame  27.88ms  p95   31.6  js 27.93  gpu  96.74  calls  189  tris    75k  tex 87  vis he wa 
+hero        dpr15       60.7 fps  frame  16.47ms  p95   18.4  js 16.09  gpu  55.26  calls  189  tris    75k  tex 87  vis he wa 
+hero        dpr1       125.4 fps  frame   7.98ms  p95   10.1  js  7.68  gpu   25.2  calls  189  tris    75k  tex 87  vis he wa 
+hero        nopost     126.4 fps  frame   7.91ms  p95    9.5  js  7.72  gpu  13.94  calls  159  tris    75k  tex 55  vis he wa 
+hero        nobloom       40 fps  frame  25.02ms  p95   30.2  js 24.61  gpu  64.78  calls  173  tris    75k  tex 71  vis he wa 
+hero        nodof       47.8 fps  frame  20.92ms  p95   33.8  js 20.06  gpu  56.76  calls  178  tris    75k  tex 79  vis he wa 
+hero        nomsaa      42.6 fps  frame  23.46ms  p95   26.4  js 22.93  gpu  74.89  calls  189  tris    75k  tex 87  vis he wa 
+hero        noshadows   37.2 fps  frame  26.86ms  p95   30.1  js 26.55  gpu  89.28  calls   88  tris    35k  tex 85  vis he wa 
+hero        nonoise     35.8 fps  frame  27.96ms  p95   49.3  js 20.67  gpu  99.26  calls  189  tris    75k  tex 87  vis he wa 
+hero        only          42 fps  frame  23.83ms  p95   26.3  js 22.55  gpu  79.27  calls   79  tris     2k  tex 86  vis he 
+warehouse   baseline      31 fps  frame  32.29ms  p95   65.1  js 32.57  gpu 106.91  calls  417  tris    88k  tex 87  vis he wa co 
+warehouse   dpr15       46.7 fps  frame   21.4ms  p95   41.4  js 21.21  gpu  69.19  calls  417  tris    88k  tex 87  vis he wa co 
+warehouse   dpr1        87.3 fps  frame  11.45ms  p95   21.4  js 11.18  gpu   35.4  calls  417  tris    88k  tex 87  vis he wa co 
+warehouse   nopost      74.5 fps  frame  13.42ms  p95   27.1  js 13.06  gpu  22.88  calls  387  tris    88k  tex 55  vis he wa co 
+warehouse   nobloom     28.1 fps  frame  35.57ms  p95   68.8  js 36.16  gpu   88.6  calls  401  tris    88k  tex 71  vis he wa co 
+warehouse   nodof       34.6 fps  frame  28.92ms  p95   56.3  js 28.96  gpu  77.44  calls  406  tris    88k  tex 79  vis he wa co 
+warehouse   nomsaa      32.2 fps  frame  31.05ms  p95   62.8  js 30.65  gpu  97.72  calls  417  tris    88k  tex 87  vis he wa co 
+warehouse   noshadows   24.5 fps  frame  40.81ms  p95   99.7  js 42.79  gpu 116.82  calls  230  tris    44k  tex 85  vis he wa co 
+warehouse   nonoise     26.9 fps  frame  37.12ms  p95     75  js 37.59  gpu 127.42  calls  417  tris    88k  tex 87  vis he wa co 
+warehouse   only        25.7 fps  frame  38.94ms  p95   43.2  js 38.55  gpu 133.87  calls  264  tris    78k  tex 87  vis wa 
+conveyor    baseline    28.8 fps  frame  34.67ms  p95   50.6  js 34.01  gpu 115.18  calls  270  tris    92k  tex 87  vis wa co co 
+conveyor    dpr15         45 fps  frame  22.21ms  p95     42  js  21.2  gpu  72.07  calls  270  tris    92k  tex 87  vis wa co co 
+conveyor    dpr1        98.8 fps  frame  10.12ms  p95   14.8  js  9.74  gpu   32.1  calls  270  tris    92k  tex 87  vis wa co co 
+conveyor    nopost      88.8 fps  frame  11.27ms  p95   20.7  js 11.14  gpu  20.65  calls  240  tris    92k  tex 55  vis wa co co 
+conveyor    nobloom     30.9 fps  frame  32.35ms  p95   36.9  js 32.62  gpu  82.19  calls  254  tris    92k  tex 71  vis wa co co 
+conveyor    nodof       38.4 fps  frame  26.07ms  p95   45.7  js 25.29  gpu  71.53  calls  259  tris    92k  tex 79  vis wa co co 
+conveyor    nomsaa      34.2 fps  frame  29.23ms  p95   39.1  js 29.06  gpu  95.29  calls  270  tris    92k  tex 87  vis wa co co 
+conveyor    noshadows   31.1 fps  frame  32.11ms  p95   35.1  js 31.55  gpu 111.89  calls  102  tris    48k  tex 85  vis wa co co 
+conveyor    nonoise     29.9 fps  frame   33.4ms  p95   39.3  js 33.44  gpu 115.77  calls  270  tris    92k  tex 87  vis wa co co 
+conveyor    only        29.6 fps  frame  33.74ms  p95     38  js 33.54  gpu 115.12  calls  154  tris    10k  tex 86  vis co 
+container   baseline    28.5 fps  frame  35.03ms  p95   69.3  js 32.84  gpu 109.32  calls  407  tris    34k  tex 87  vis co co gl 
+container   dpr15       55.3 fps  frame  18.09ms  p95   36.1  js 17.51  gpu  56.11  calls  407  tris    34k  tex 93  vis co co gl 
+container   dpr1       102.2 fps  frame   9.79ms  p95   18.4  js  9.18  gpu  27.36  calls  408  tris    34k  tex 87  vis co co gl 
+container   nopost      91.6 fps  frame  10.91ms  p95   21.5  js 10.67  gpu  18.39  calls  378  tris    34k  tex 55  vis co co gl 
+container   nobloom     29.1 fps  frame  34.31ms  p95   64.8  js 32.25  gpu  80.05  calls  391  tris    34k  tex 71  vis co co gl 
+container   nodof       39.6 fps  frame  25.26ms  p95   52.7  js  25.1  gpu  66.37  calls  396  tris    34k  tex 79  vis co co gl 
+container   nomsaa      36.3 fps  frame  27.56ms  p95     56  js 27.86  gpu  88.84  calls  407  tris    34k  tex 87  vis co co gl 
+container   noshadows   30.4 fps  frame  32.91ms  p95   65.5  js 33.33  gpu 112.41  calls  319  tris    31k  tex 85  vis co co gl 
+container   nonoise     29.3 fps  frame  34.17ms  p95   67.8  js 33.58  gpu 110.96  calls  408  tris    34k  tex 87  vis co co gl 
+container   only        26.9 fps  frame  37.17ms  p95   43.3  js 36.86  gpu 128.64  calls  101  tris     9k  tex 86  vis co 
+globe       baseline    32.6 fps  frame   30.7ms  p95   34.3  js  30.9  gpu 105.26  calls   66  tris   111k  tex 87  vis co gl tu 
+globe       dpr15       55.5 fps  frame  18.01ms  p95   20.2  js  17.4  gpu  59.33  calls   66  tris   111k  tex 87  vis co gl tu 
+globe       dpr1       120.5 fps  frame    8.3ms  p95   10.3  js  7.99  gpu  26.41  calls   66  tris   111k  tex 87  vis co gl tu 
+globe       nopost     196.2 fps  frame    5.1ms  p95    6.2  js  4.74  gpu   8.58  calls   36  tris   111k  tex 55  vis co gl tu 
+globe       nobloom     37.5 fps  frame  26.69ms  p95   29.3  js 26.98  gpu  71.42  calls   50  tris   111k  tex 71  vis co gl tu 
+globe       nodof       45.9 fps  frame  21.81ms  p95   24.7  js 21.29  gpu  60.94  calls   55  tris   111k  tex 79  vis co gl tu 
+globe       nomsaa      40.3 fps  frame  24.83ms  p95   28.1  js 24.69  gpu  80.75  calls   66  tris   111k  tex 87  vis co gl tu 
+globe       noshadows   36.5 fps  frame  27.42ms  p95   29.5  js 27.57  gpu  94.52  calls   66  tris   111k  tex 85  vis co gl tu 
+globe       nonoise     17.8 fps  frame  56.14ms  p95   82.4  js 56.05  gpu 256.25  calls   66  tris   111k  tex 87  vis co gl tu 
+file:///Users/shamsiddintadjiddinov40gmail.com/Desktop/tujjor_express/node_modules/puppeteer-core/lib/puppeteer/util/decorators.js:99
+                throw new Error(message(this));
+                      ^
+
+Error: Attempted to use detached Frame 'E7F49450AF3D937EC87DB61D3DD5D576'.
+    at CdpFrame.<anonymous> (file:///Users/shamsiddintadjiddinov40gmail.com/Desktop/tujjor_express/node_modules/puppeteer-core/lib/puppeteer/util/decorators.js:99:23)
+    at CdpPage.evaluate (file:///Users/shamsiddintadjiddinov40gmail.com/Desktop/tujjor_express/node_modules/puppeteer-core/lib/puppeteer/api/Page.js:832:43)
+    at measure (file:///Users/shamsiddintadjiddinov40gmail.com/Desktop/tujjor_express/scripts/perf-profile.mjs:65:14)
+    at async file:///Users/shamsiddintadjiddinov40gmail.com/Desktop/tujjor_express/scripts/perf-profile.mjs:75:54
+
+Node.js v24.13.0

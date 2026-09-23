@@ -17,7 +17,11 @@ import { PageTransitionScene } from './scenes/PageTransitionScene'
 import { IntroSequence } from './IntroSequence'
 import { DebugOverlay } from './DebugOverlay'
 import { StageEvents } from './StageEvents'
+import { PerfSampler } from './PerfSampler'
+import { RenderDriver } from './RenderDriver'
+import { PERF_ENABLED, perfOverrides } from '@/lib/perf'
 import { CameraMasks } from './CameraMasks'
+import { SoundDirector } from './SoundDirector'
 
 function ProgressStep() {
   useFrame((_, dt) => stepProgress(Math.min(dt, 0.05)), -100)
@@ -28,15 +32,6 @@ function FirstFrame() {
   useFrame(() => {
     if (!useApp.getState().readyScenes.has('__frame__')) mark('__frame__')
   })
-  return null
-}
-function VisibilityPause() {
-  const set = useThree((s) => s.setFrameloop)
-  useEffect(() => {
-    const on = () => set(document.hidden ? 'never' : 'always')
-    document.addEventListener('visibilitychange', on)
-    return () => document.removeEventListener('visibilitychange', on)
-  }, [set])
   return null
 }
 function ContextGuard({ onLost }: { onLost: () => void }) {
@@ -77,7 +72,7 @@ export function ExperienceCanvas() {
       <Canvas
         key={key}
         dpr={[1, profile.dpr]}
-        shadows={profile.shadowMap > 0 ? { type: THREE.PCFSoftShadowMap } : false}
+        shadows={(perfOverrides.shadows ?? profile.shadowMap > 0) ? { type: perfOverrides.shadowType === 'basic' ? THREE.BasicShadowMap : perfOverrides.shadowType === 'soft' ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap } : false}
         camera={{ fov: 34, near: 0.1, far: 400, position: [0, 1.4, 4.2] }}
         gl={{
           antialias: false,
@@ -92,7 +87,7 @@ export function ExperienceCanvas() {
         eventSource={typeof document !== 'undefined' ? document.body : undefined}
         eventPrefix="client"
         style={{ pointerEvents: 'none' }}
-        frameloop="always"
+        frameloop="always" // switched to "never" by RenderDriver after mount (ticker-driven advance)
         onCreated={({ gl, scene, raycaster }) => {
           scene.background = new THREE.Color('#0b0c0f')
           gl.setClearColor('#0b0c0f', 1)
@@ -101,15 +96,17 @@ export function ExperienceCanvas() {
         }}
       >
         <color attach="background" args={['#0b0c0f']} />
+        <RenderDriver />
         <ProgressStep />
+        {PERF_ENABLED ? <PerfSampler /> : null}
         <ContextGuard onLost={() => setKey((k) => k + 1)} />
         <QualityController />
-        <VisibilityPause />
         <AdaptiveEvents />
         <CameraRig />
         <StageEvents />
         <Lights />
         <CameraMasks />
+        <SoundDirector />
         <Suspense fallback={null}>
           <HomeScenes />
           <InnerPageScene />
@@ -119,7 +116,7 @@ export function ExperienceCanvas() {
         </Suspense>
         <Effects />
         <FirstFrame />
-        {debug ? <DebugOverlay /> : null}
+        {debug && PERF_ENABLED ? <DebugOverlay /> : null}
       </Canvas>
     </div>
   )

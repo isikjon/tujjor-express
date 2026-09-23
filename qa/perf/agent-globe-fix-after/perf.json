@@ -1,0 +1,45 @@
+{
+ "base": "http://localhost:3100",
+ "tier": "ultra",
+ "dpr": 1.5,
+ "portrait": false,
+ "seconds": 2,
+ "rows": [
+  {
+   "stage": "globe",
+   "config": "only",
+   "fps": 67.5,
+   "frameMs": 14.8,
+   "p95Ms": 18.9,
+   "jsMs": 14.57,
+   "gpuMs": 48.63,
+   "calls": 51,
+   "tris": 22244,
+   "points": 15994,
+   "textures": 67,
+   "geometries": 240,
+   "programs": 160,
+   "heapMb": 107,
+   "dpr": 1.5,
+   "visible": "gl "
+  },
+  {
+   "stage": "globe",
+   "config": "nopost",
+   "fps": 355.2,
+   "frameMs": 2.81,
+   "p95Ms": 5.4,
+   "jsMs": 2.67,
+   "gpuMs": 4.71,
+   "calls": 23,
+   "tris": 22216,
+   "points": 15994,
+   "textures": 48,
+   "geometries": 239,
+   "programs": 147,
+   "heapMb": 130,
+   "dpr": 1.5,
+   "visible": "gl "
+  }
+ ]
+}

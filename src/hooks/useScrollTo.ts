@@ -1,6 +1,7 @@
 'use client'
 import { useCallback } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { usePath } from '@/hooks/usePath'
 import { useLenis } from './useLenis'
 import { scroll } from '@/lib/stores'
 import { stageAnchor, type StageId } from '@/lib/timeline'
@@ -8,7 +9,7 @@ import { stageAnchor, type StageId } from '@/lib/timeline'
 /** Scrolls the home journey to a stage; from inner pages it navigates home with a hash. */
 export function useScrollToStage() {
   const lenis = useLenis()
-  const pathname = usePathname()
+  const pathname = usePath()
   const router = useRouter()
   return useCallback(
     (id: StageId, immediate = false) => {

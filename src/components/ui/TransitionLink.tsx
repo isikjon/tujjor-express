@@ -1,6 +1,7 @@
 'use client'
 import Link, { type LinkProps } from 'next/link'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { normalizePath, usePath } from '@/hooks/usePath'
 import { useCallback, type ComponentPropsWithoutRef, type MouseEvent } from 'react'
 import { useApp } from '@/lib/stores'
 import { audio } from '@/lib/audio'
@@ -17,7 +18,7 @@ export const TRANSITION_MS = 700
  */
 export function TransitionLink({ href, onClick, children, ...rest }: Props) {
   const router = useRouter()
-  const pathname = usePathname()
+  const pathname = usePath()
   const setTransitioning = useApp((s) => s.setTransitioning)
   const setMenuOpen = useApp((s) => s.setMenuOpen)
 
@@ -28,7 +29,7 @@ export function TransitionLink({ href, onClick, children, ...rest }: Props) {
       const url = typeof href === 'string' ? href : href.pathname ?? '/'
       const [path] = url.split('#')
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
-      if (path === pathname || url.startsWith('http')) return
+      if (normalizePath(path) === pathname || url.startsWith('http')) return
       e.preventDefault()
       setMenuOpen(false)
       const reduced = useApp.getState().reducedMotion

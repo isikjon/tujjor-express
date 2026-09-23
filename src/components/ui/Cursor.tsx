@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react'
 import { useApp } from '@/lib/stores'
 import { useT } from '@/translations'
+import { ticker } from '@/lib/ticker'
 
 /**
  * Custom cursor: tiny dot by default; expands with a label on 3D objects (DRAG),
@@ -21,39 +22,50 @@ export function Cursor() {
     document.body.classList.add('cursor-custom')
     const pos = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
     const ringPos = { ...pos }
-    let raf = 0
     let visible = false
+    let lastMove = performance.now()
+    const show = (v: boolean) => {
+      if (visible === v) return
+      visible = v
+      dot.current?.style.setProperty('opacity', v ? '1' : '0')
+      ring.current?.style.setProperty('opacity', v ? '1' : '0')
+    }
     const onMove = (e: MouseEvent) => {
       pos.x = e.clientX
       pos.y = e.clientY
-      if (!visible) {
-        visible = true
-        dot.current?.style.setProperty('opacity', '1')
-        ring.current?.style.setProperty('opacity', '1')
-      }
-      // DOM-driven modes
-      const el = (e.target as HTMLElement | null)?.closest?.('[data-cursor]') as HTMLElement | null
-      const mode = el?.dataset.cursor as 'open' | 'drag' | 'explore' | undefined
+      lastMove = performance.now()
+      show(true)
+      const target = e.target as HTMLElement | null
+      // native text cursor over inputs
+      const isText = !!target?.closest?.('input, textarea, select, [contenteditable="true"]')
+      const el = target?.closest?.('[data-cursor]') as HTMLElement | null
+      const mode = isText ? 'hidden' : (el?.dataset.cursor as 'open' | 'drag' | 'explore' | undefined)
       const cur = useApp.getState().cursor
       if (mode && cur !== mode) useApp.getState().setCursor(mode)
-      else if (!mode && cur !== 'default' && !el && (e.target as HTMLElement)?.tagName !== 'CANVAS') useApp.getState().setCursor('default')
+      else if (!mode && cur !== 'default' && !el && target?.tagName !== 'CANVAS') useApp.getState().setCursor('default')
     }
     const onLeave = () => {
       visible = false
       dot.current?.style.setProperty('opacity', '0')
       ring.current?.style.setProperty('opacity', '0')
     }
+    let settled = true
     const loop = () => {
+      if (visible && performance.now() - lastMove > 2000) show(false)
       const k = reduced ? 1 : 0.18
-      ringPos.x += (pos.x - ringPos.x) * k
-      ringPos.y += (pos.y - ringPos.y) * k
+      const dx = pos.x - ringPos.x
+      const dy = pos.y - ringPos.y
+      // skip DOM writes once the ring has settled (no work while the pointer is still)
+      if (settled && Math.abs(dx) < 0.05 && Math.abs(dy) < 0.05) return
+      settled = Math.abs(dx) < 0.05 && Math.abs(dy) < 0.05
+      ringPos.x += dx * k
+      ringPos.y += dy * k
       if (dot.current) dot.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0) translate(-50%, -50%)`
       if (ring.current) ring.current.style.transform = `translate3d(${ringPos.x}px, ${ringPos.y}px, 0) translate(-50%, -50%)`
-      raf = requestAnimationFrame(loop)
     }
     window.addEventListener('mousemove', onMove, { passive: true })
     document.documentElement.addEventListener('mouseleave', onLeave)
-    raf = requestAnimationFrame(loop)
+    const off = ticker.add(loop, 20)
     const unsub = useApp.subscribe(
       (s) => s.cursor,
       (mode) => {
@@ -67,9 +79,10 @@ export function Cursor() {
     )
     return () => {
       document.body.classList.remove('cursor-custom')
+      document.body.classList.remove('cursor-text')
       window.removeEventListener('mousemove', onMove)
       document.documentElement.removeEventListener('mouseleave', onLeave)
-      cancelAnimationFrame(raf)
+      off()
       unsub()
     }
   }, [isTouch, reduced, t])

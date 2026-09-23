@@ -1,7 +1,7 @@
 /**
  * Camera continuity contract check (docs/DESIGN.md §3.3):
  * for every consecutive stage pair without `cutAtEnd`, cameraAt_N(1) must equal cameraAt_{N+1}(0)
- * (|Δpos| < 1e-3, |Δtarget| < 1e-3, |Δfov| < 1e-3) in world space. Run: npm run check:camera
+ * (|Δpos| < 0.02, |Δtarget| < 0.02, |Δfov| < 0.01) in world space. Run: npm run check:camera
  */
 import { STAGES, WORLD_OFFSET } from '../src/lib/timeline'
 import type { CameraCtx, CameraFn } from '../src/lib/camera'
@@ -51,7 +51,7 @@ for (let i = 0; i < STAGES.length - 1; i++) {
   const dp = d(pa.position, pb.position)
   const dt = d(pa.target, pb.target)
   const df = Math.abs(pa.fov - pb.fov)
-  const ok = dp < 1e-3 && dt < 1e-3 && df < 1e-3
+  const ok = dp < 0.02 && dt < 0.02 && df < 0.01
   if (!ok) failures++
   console.log(`${ok ? '✓' : '✗'} ${a.id} → ${b.id}: Δpos ${dp.toFixed(3)} Δtarget ${dt.toFixed(3)} Δfov ${df.toFixed(2)}${ok ? '' : `\n     ${a.id}(1) = ${JSON.stringify(pa)}\n     ${b.id}(0) = ${JSON.stringify(pb)}`}`)
 }

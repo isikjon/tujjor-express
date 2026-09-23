@@ -1,9 +1,9 @@
 'use client'
-import { forwardRef, useMemo, useRef, useImperativeHandle } from 'react'
+import { forwardRef, useEffect, useMemo, useRef, useImperativeHandle } from 'react'
 import * as THREE from 'three'
 import { useApp } from '@/lib/stores'
 import { PROFILES } from '@/lib/quality'
-import { cardboardTextures } from '@/lib/textures'
+import { cardboardAtlas, cardboardTextures, type CardboardVariant } from '@/lib/textures'
 
 /** Canonical box size (w × h × d) — the match-cut and every handoff rely on this. */
 export const BOX_SIZE: [number, number, number] = [0.6, 0.45, 0.45]
@@ -33,6 +33,11 @@ interface Props {
   position?: [number, number, number]
   rotation?: [number, number, number]
   children?: React.ReactNode
+  /**
+   * 'static': one merged mesh with an atlas material (1 draw + 1 shadow draw) — use whenever setLid /
+   * setExplode / setGlow are never called. 'dynamic' (default): 11 meshes with separable panels and flaps.
+   */
+  mode?: 'static' | 'dynamic'
 }
 
 const TINTS = ['#ffffff', '#f3e6d2', '#e9d5b8', '#fff3e4']
@@ -43,6 +48,67 @@ const TINTS = ['#ffffff', '#f3e6d2', '#e9d5b8', '#fff3e4']
  * Panels are separate meshes so the exploded / open states are pure transforms (no morphing).
  */
 export const TujjorBox = forwardRef<TujjorBoxHandle, Props>(function TujjorBox(
+  { scale = 1, tint = 0, castShadow = true, receiveShadow = true, flaps = true, lid = 0, explode = 0, glow = 0, position, rotation, children, mode = 'dynamic' },
+  ref,
+) {
+  if (mode === 'static') return <StaticBox ref={ref} scale={scale} tint={tint} castShadow={castShadow} receiveShadow={receiveShadow} position={position} rotation={rotation}>{children}</StaticBox>
+  return <DynamicBox ref={ref} scale={scale} tint={tint} castShadow={castShadow} receiveShadow={receiveShadow} flaps={flaps} lid={lid} explode={explode} glow={glow} position={position} rotation={rotation}>{children}</DynamicBox>
+})
+
+/** Single-draw box: BoxGeometry with per-face UVs remapped into the cardboard atlas (front +Z brand, ±X arrows, rest plain). */
+const StaticBox = forwardRef<TujjorBoxHandle, Omit<Props, 'mode' | 'flaps' | 'lid' | 'explode' | 'glow'>>(function StaticBox({ scale = 1, tint = 0, castShadow = true, receiveShadow = true, position, rotation, children }, ref) {
+  const tier = useApp((s) => s.tier)
+  const texSize = PROFILES[tier].textureSize >= 1024 ? 1024 : 512
+  const group = useRef<THREE.Group>(null!)
+  const { geometry, material } = useMemo(() => {
+    const atlas = cardboardAtlas(texSize)
+    const [w, h, d] = BOX_SIZE
+    const g = new THREE.BoxGeometry(w, h, d)
+    // BoxGeometry face order: +x, -x, +y, -y, +z, -z (4 verts each)
+    const faceVariant: CardboardVariant[] = [2, 2, 3, 1, 0, 1]
+    const uv = g.getAttribute('uv') as THREE.BufferAttribute
+    for (let f = 0; f < 6; f++) {
+      const [u0, u1] = atlas.tile(faceVariant[f])
+      for (let i = 0; i < 4; i++) {
+        const idx = f * 4 + i
+        uv.setX(idx, u0 + uv.getX(idx) * (u1 - u0))
+      }
+    }
+    uv.needsUpdate = true
+    const material = new THREE.MeshStandardMaterial({
+      map: atlas.map,
+      normalMap: atlas.normalMap,
+      normalScale: new THREE.Vector2(0.55, 0.55),
+      roughnessMap: atlas.roughnessMap,
+      roughness: 0.92,
+      metalness: 0,
+      color: new THREE.Color(TINTS[tint]),
+      envMapIntensity: 0.6,
+    })
+    return { geometry: g, material }
+  }, [texSize, tint])
+  useEffect(() => () => geometry.dispose(), [geometry])
+  useImperativeHandle(
+    ref,
+    () => ({
+      get group() {
+        return group.current
+      },
+      setLid: () => {},
+      setExplode: () => {},
+      setGlow: () => {},
+    }),
+    [],
+  )
+  return (
+    <group ref={group} scale={scale} position={position} rotation={rotation} name="TujjorBox">
+      <mesh geometry={geometry} material={material} castShadow={castShadow} receiveShadow={receiveShadow} />
+      {children}
+    </group>
+  )
+})
+
+const DynamicBox = forwardRef<TujjorBoxHandle, Omit<Props, 'mode'>>(function DynamicBox(
   { scale = 1, tint = 0, castShadow = true, receiveShadow = true, flaps = true, lid = 0, explode = 0, glow = 0, position, rotation, children },
   ref,
 ) {

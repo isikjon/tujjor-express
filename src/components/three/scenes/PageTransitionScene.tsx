@@ -51,7 +51,7 @@ export function PageTransitionScene() {
   })
   return (
     <group ref={holder} visible={false}>
-      <TujjorBox ref={box} scale={1.4} castShadow={false} receiveShadow={false} />
+      <TujjorBox ref={box} mode="static" scale={1.4} castShadow={false} receiveShadow={false} />
     </group>
   )
 }

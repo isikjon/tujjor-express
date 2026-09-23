@@ -1,8 +1,9 @@
 'use client'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { useApp, scroll } from '@/lib/stores'
+import { isRenderedInTree } from '@/lib/visibility'
 
 const vert = /* glsl */ `
 attribute vec3 aPosFlat;
@@ -70,8 +71,15 @@ export function GlowLine({ points, flatPoints, radius = 0.05, color = '#ff6a00',
       g.setAttribute('aPosFlat', g.getAttribute('position').clone())
     }
     g.computeBoundingSphere()
+    if (flatPoints && flatPoints.length === points.length && g.boundingSphere) {
+      // the shader morphs between sphere-space and flat-space positions → the cull sphere must cover both
+      const box = new THREE.Box3().setFromPoints(points).expandByPoint(new THREE.Vector3())
+      flatPoints.forEach((p) => box.expandByPoint(p))
+      box.getBoundingSphere(g.boundingSphere)
+      g.boundingSphere.radius += radius
+    }
     return g
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [points, flatPoints, radius, radialSegments, tubularSegments])
   const material = useMemo(
     () =>
@@ -96,8 +104,10 @@ export function GlowLine({ points, flatPoints, radius = 0.05, color = '#ff6a00',
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   )
+  useEffect(() => () => geometry.dispose(), [geometry])
+  useEffect(() => () => material.dispose(), [material])
   useFrame((_, dt) => {
-    if (!mesh.current.visible) return
+    if (!isRenderedInTree(mesh.current)) return
     const u = material.uniforms
     if (!useApp.getState().motionOff) u.uTime.value += Math.min(dt, 0.05) * (1 + 0.5 * Math.abs(scroll.velocity))
     u.uHead.value = head
@@ -108,5 +118,5 @@ export function GlowLine({ points, flatPoints, radius = 0.05, color = '#ff6a00',
       u.uRotY.value = morphRef.current.rotY
     }
   })
-  return <mesh ref={mesh} geometry={geometry} material={material} frustumCulled={false} />
+  return <mesh ref={mesh} geometry={geometry} material={material} />
 }

@@ -1,5 +1,6 @@
 'use client'
 import { forwardRef, useImperativeHandle, useMemo, useRef } from 'react'
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import * as THREE from 'three'
 import { brandPlate, corrugatedNormal, labelTexture } from '@/lib/textures'
 import { CONTAINER_NO } from '@/config/worldB'
@@ -53,6 +54,37 @@ export const Container = forwardRef<ContainerHandle, Props>(function Container({
   }
   useImperativeHandle(ref, () => ({ get group() { return group.current }, setDoors }), [])
   const th = 0.04
+  // interior lining = 5 faces (no door face) so the doorway is open from inside; roller floor = 1 instanced mesh; posts merged
+  const built = useMemo(() => {
+    const lining = new THREE.BoxGeometry(L - th * 2, H - th, W - th * 2)
+    // drop the −X face (group index 1 in BoxGeometry order +x,−x,+y,−y,+z,−z)
+    const idx = lining.getIndex()!
+    const g = lining.groups
+    const keep: number[] = []
+    g.forEach((gr, i) => {
+      if (i === 1) return
+      for (let k = gr.start; k < gr.start + gr.count; k++) keep.push(idx.getX(k))
+    })
+    lining.setIndex(keep)
+    lining.clearGroups()
+    lining.translate(0, H / 2, 0)
+    const posts = mergeGeometries(
+      [-1, 1].flatMap((sx) => [-1, 1].map((sz) => new THREE.BoxGeometry(0.12, H + 0.04, 0.12).translate((sx * L) / 2, H / 2, (sz * W) / 2))),
+    )!
+    const roller = new THREE.CylinderGeometry(0.03, 0.03, W - 0.4, 8).rotateX(Math.PI / 2)
+    return { lining, posts, roller }
+  }, [L, H, W])
+  const rollers = useRef<THREE.InstancedMesh>(null!)
+  const setRollers = (m: THREE.InstancedMesh | null) => {
+    if (!m || rollers.current === m) return
+    rollers.current = m
+    const mat = new THREE.Matrix4()
+    for (let i = 0; i < 22; i++) {
+      mat.makeTranslation(-L / 2 + 0.4 + i * 0.52, 0.06, 0)
+      m.setMatrixAt(i, mat)
+    }
+    m.instanceMatrix.needsUpdate = true
+  }
   return (
     <group ref={group} position={position} rotation={rotation} name="Container">
       {/* shell: 5 faces (no door face) */}
@@ -73,25 +105,13 @@ export const Container = forwardRef<ContainerHandle, Props>(function Container({
       </mesh>
       {interior ? (
         <>
-          <mesh position={[0, H / 2, 0]} material={mats.inner}>
-            <boxGeometry args={[L - th * 2, H - th, W - th * 2]} />
-          </mesh>
-          {/* roller floor strip */}
-          {Array.from({ length: 22 }).map((_, i) => (
-            <mesh key={i} position={[-L / 2 + 0.4 + i * 0.52, 0.06, 0]} rotation={[0, 0, Math.PI / 2]} material={mats.frame}>
-              <cylinderGeometry args={[0.03, 0.03, W - 0.4, 8]} />
-            </mesh>
-          ))}
+          <mesh geometry={built.lining} material={mats.inner} />
+          {/* roller floor strip: rods across the width (z), one instanced draw */}
+          <instancedMesh ref={setRollers} args={[built.roller, mats.frame, 22]} />
         </>
       ) : null}
-      {/* corner posts */}
-      {[-1, 1].map((sx) =>
-        [-1, 1].map((sz) => (
-          <mesh key={`${sx}${sz}`} position={[(sx * L) / 2, H / 2, (sz * W) / 2]} material={mats.frame} castShadow={castShadow}>
-            <boxGeometry args={[0.12, H + 0.04, 0.12]} />
-          </mesh>
-        )),
-      )}
+      {/* corner posts (merged) */}
+      <mesh geometry={built.posts} material={mats.frame} castShadow={castShadow} />
       {/* brand plate + number on +Z side */}
       <mesh position={[0, H * 0.55, W / 2 + th / 2 + 0.005]} material={mats.plate}>
         <planeGeometry args={[4.4, 1.1]} />

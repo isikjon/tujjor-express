@@ -1,11 +1,13 @@
 'use client'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { useApp } from '@/lib/stores'
 import { PROFILES } from '@/lib/quality'
 import { glowSprite } from '@/lib/textures'
 import { seeded } from '@/lib/math'
+import { perfOverrides } from '@/lib/perf'
+import { isRenderedInTree } from '@/lib/visibility'
 
 const vert = /* glsl */ `
 uniform float uTime;
@@ -65,9 +67,10 @@ export interface ParticlesProps {
  * Used for warehouse dust, orbital dust, tunnel particles, studio atmosphere, rising embers.
  */
 export function Particles({ count = 600, spread = [20, 10, 20], color = '#ffb27a', size = 1, opacity = 0.7, drift = [0, 0.05, 0], speed = 0.08, position, seed = 1, visible = true, timeScale = 1 }: ParticlesProps) {
-  const tier = useApp((s) => s.tier)
-  const n = Math.max(20, Math.floor(count * PROFILES[tier].particles))
+  // allocate the full count once; the rendered subset follows the tier smoothly via draw range
+  const n = Math.max(20, count)
   const points = useRef<THREE.Points>(null!)
+  const drawn = useRef(0)
   const { geometry, material } = useMemo(() => {
     const rnd = seeded(seed)
     const pos = new Float32Array(n * 3)
@@ -110,8 +113,22 @@ export function Particles({ count = 600, spread = [20, 10, 20], color = '#ffb27a
     return { geometry: g, material: m }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [n, seed])
+  useEffect(
+    () => () => {
+      geometry.dispose()
+      material.dispose()
+    },
+    [geometry, material],
+  )
   useFrame((state, dt) => {
-    if (!points.current || !points.current.visible) return
+    if (!points.current || !isRenderedInTree(points.current)) return
+    const target = Math.max(20, Math.floor(n * (perfOverrides.particles ?? PROFILES[useApp.getState().tier].particles)))
+    if (drawn.current !== target) {
+      // ease the count (≈ 12% per frame) so a tier change never pops
+      const next = Math.abs(target - drawn.current) < 4 ? target : drawn.current + Math.round((target - drawn.current) * 0.12)
+      drawn.current = next
+      geometry.setDrawRange(0, next)
+    }
     const u = material.uniforms
     if (!useApp.getState().motionOff) u.uTime.value += Math.min(dt, 0.05) * timeScale
     u.uPixelRatio.value = state.gl.getPixelRatio()

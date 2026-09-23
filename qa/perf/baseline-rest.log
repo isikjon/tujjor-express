@@ -1,0 +1,64 @@
+globe       baseline    41.2 fps  frame  24.29ms  p95   27.2  js 24.62  gpu  85.85  calls   66  tris   111k  tex 87  vis co gl tu 
+globe       dpr15       67.5 fps  frame  14.82ms  p95   16.5  js 14.28  gpu  46.92  calls   66  tris   111k  tex 87  vis co gl tu 
+globe       dpr1       141.2 fps  frame   7.08ms  p95    8.8  js  6.67  gpu   21.7  calls   66  tris   111k  tex 87  vis co gl tu 
+globe       nopost     292.9 fps  frame   3.41ms  p95    4.2  js  3.22  gpu   5.68  calls   36  tris   111k  tex 55  vis co gl tu 
+globe       nodof       55.9 fps  frame   17.9ms  p95   20.4  js 17.54  gpu  49.84  calls   55  tris   111k  tex 79  vis co gl tu 
+globe       nomsaa      54.1 fps  frame  18.49ms  p95   19.3  js 18.07  gpu  58.47  calls   66  tris   111k  tex 93  vis co gl tu 
+globe       only          33 fps  frame  30.33ms  p95   48.3  js 29.11  gpu  80.03  calls   56  tris    57k  tex 87  vis gl 
+tunnel      baseline    40.5 fps  frame  24.69ms  p95   28.2  js 24.78  gpu  84.52  calls   61  tris    61k  tex 87  vis gl tu uz 
+tunnel      dpr15       68.3 fps  frame  14.64ms  p95   15.8  js 14.23  gpu   47.9  calls   61  tris    61k  tex 87  vis gl tu uz 
+tunnel      dpr1        77.1 fps  frame  12.97ms  p95   17.9  js 12.45  gpu  40.63  calls   61  tris    61k  tex 87  vis gl tu uz 
+tunnel      nopost     455.9 fps  frame   2.19ms  p95      3  js   1.9  gpu   2.84  calls   31  tris    61k  tex 55  vis gl tu uz 
+tunnel      nodof       58.2 fps  frame  17.17ms  p95   18.7  js 16.94  gpu  48.27  calls   50  tris    61k  tex 79  vis gl tu uz 
+tunnel      nomsaa      54.4 fps  frame  18.39ms  p95   21.6  js 18.16  gpu  58.23  calls   61  tris    61k  tex 87  vis gl tu uz 
+tunnel      only        40.1 fps  frame  24.96ms  p95   27.5  js 24.52  gpu  81.39  calls   50  tris    47k  tex 87  vis tu 
+uzbekistan  baseline    38.8 fps  frame  25.75ms  p95   28.2  js 25.96  gpu  91.41  calls  110  tris   143k  tex 90  vis tu uz de 
+uzbekistan  dpr15       65.6 fps  frame  15.24ms  p95   16.3  js 15.21  gpu  52.04  calls  110  tris   143k  tex 90  vis tu uz de 
+uzbekistan  dpr1       132.2 fps  frame   7.57ms  p95   12.3  js  7.12  gpu  24.09  calls  110  tris   143k  tex 90  vis tu uz de 
+uzbekistan  nopost     127.9 fps  frame   7.82ms  p95    8.8  js  7.53  gpu  14.07  calls   82  tris   143k  tex 58  vis tu uz de 
+uzbekistan  nodof         49 fps  frame  20.42ms  p95   39.7  js 19.48  gpu  55.73  calls  101  tris   143k  tex 82  vis tu uz de 
+uzbekistan  nomsaa      47.7 fps  frame  20.98ms  p95   22.6  js 21.04  gpu  69.02  calls  112  tris   143k  tex 90  vis tu uz de 
+uzbekistan  only          38 fps  frame  26.28ms  p95     29  js 26.26  gpu  90.41  calls   94  tris    49k  tex 90  vis uz 
+delivery    baseline    38.2 fps  frame  26.15ms  p95   51.6  js  25.9  gpu  87.71  calls  279  tris    51k  tex 97  vis uz de ne 
+delivery    dpr15       64.5 fps  frame  15.51ms  p95   29.4  js 15.17  gpu  50.78  calls  279  tris    51k  tex 97  vis uz de ne 
+delivery    dpr1       130.6 fps  frame   7.66ms  p95   14.5  js  7.27  gpu  22.88  calls  279  tris    51k  tex 97  vis uz de ne 
+delivery    nopost       134 fps  frame   7.46ms  p95   14.3  js   7.1  gpu  13.89  calls  249  tris    51k  tex 65  vis uz de ne 
+delivery    nodof       50.6 fps  frame  19.77ms  p95   37.7  js 18.95  gpu  50.87  calls  268  tris    51k  tex 89  vis uz de ne 
+delivery    nomsaa      45.9 fps  frame  21.77ms  p95     43  js 21.34  gpu   68.8  calls  279  tris    51k  tex 97  vis uz de ne 
+delivery    only        31.1 fps  frame   32.2ms  p95   56.9  js 31.04  gpu 103.15  calls  203  tris    31k  tex 96  vis de 
+network     baseline    16.9 fps  frame   59.2ms  p95  126.9  js  55.4  gpu 189.53  calls  316  tris    60k  tex 102  vis de ne ex 
+network     dpr15       24.4 fps  frame  40.97ms  p95     86  js 37.44  gpu 125.88  calls  315  tris    60k  tex 102  vis de ne ex 
+network     dpr1        43.7 fps  frame  22.86ms  p95   47.5  js 21.11  gpu  61.94  calls  315  tris    60k  tex 102  vis de ne ex 
+network     nopost     120.7 fps  frame   8.28ms  p95   12.9  js  7.37  gpu  20.33  calls  285  tris    60k  tex 70  vis de ne ex 
+network     nodof       52.9 fps  frame   18.9ms  p95   37.2  js 17.87  gpu  60.17  calls  304  tris    60k  tex 91  vis de ne ex 
+network     nomsaa      38.3 fps  frame  26.13ms  p95   49.9  js 24.51  gpu  67.47  calls  315  tris    60k  tex 93  vis de ne ex 
+network     only        27.4 fps  frame  36.52ms  p95   78.3  js 35.94  gpu 111.42  calls  289  tris    56k  tex 93  vis ne 
+exploded    baseline    29.3 fps  frame  34.08ms  p95   67.6  js 32.31  gpu 118.51  calls  594  tris   121k  tex 97  vis ne ex ca 
+exploded    dpr15       50.3 fps  frame  19.86ms  p95   39.4  js 18.65  gpu  64.81  calls  594  tris   121k  tex 106  vis ne ex ca 
+exploded    dpr1       106.2 fps  frame   9.42ms  p95   14.1  js  8.71  gpu  30.29  calls  594  tris   121k  tex 97  vis ne ex ca 
+exploded    nopost     102.3 fps  frame   9.77ms  p95   12.2  js  8.85  gpu  26.54  calls  564  tris   121k  tex 65  vis ne ex ca 
+exploded    nodof       40.1 fps  frame  24.96ms  p95   48.2  js 23.43  gpu  66.83  calls  583  tris   121k  tex 89  vis ne ex ca 
+exploded    nomsaa      11.7 fps  frame   85.8ms  p95  182.2  js    91  gpu 263.48  calls  594  tris   121k  tex 106  vis ne ex ca 
+exploded    only        17.1 fps  frame  58.47ms  p95  125.1  js 62.07  gpu 227.46  calls  276  tris    59k  tex 105  vis ex 
+calculator  baseline    26.4 fps  frame  37.83ms  p95   64.5  js 36.08  gpu 131.39  calls  336  tris    18k  tex 100  vis ex ca tr 
+calculator  dpr15       30.5 fps  frame  32.82ms  p95   63.3  js 31.57  gpu    119  calls  336  tris    18k  tex 108  vis ex ca tr 
+calculator  dpr1        51.8 fps  frame  19.32ms  p95   36.2  js  17.3  gpu  63.45  calls  336  tris    18k  tex 108  vis ex ca tr 
+calculator  nopost      75.1 fps  frame  13.31ms  p95   23.8  js 12.16  gpu  54.47  calls  306  tris    18k  tex 76  vis ex ca tr 
+calculator  nodof         11 fps  frame  91.07ms  p95    211  js 89.54  gpu 239.17  calls  325  tris    18k  tex 100  vis ex ca tr 
+calculator  nomsaa        20 fps  frame  50.06ms  p95  109.1  js 47.04  gpu 184.83  calls  336  tris    18k  tex 108  vis ex ca tr 
+calculator  only        27.6 fps  frame  36.28ms  p95   57.2  js 35.31  gpu  132.1  calls  218  tris     4k  tex 98  vis ca 
+tracking    baseline    29.2 fps  frame  34.28ms  p95   67.2  js 34.22  gpu 126.21  calls  302  tris    97k  tex 98  vis ca tr fi 
+tracking    dpr15       21.9 fps  frame  45.66ms  p95   64.8  js 44.59  gpu  159.7  calls  302  tris    97k  tex 98  vis ca tr fi 
+tracking    dpr1        47.2 fps  frame  21.19ms  p95   36.9  js  20.4  gpu   76.1  calls  302  tris    97k  tex 106  vis ca tr fi 
+tracking    nopost      36.5 fps  frame  27.38ms  p95   49.7  js  26.8  gpu 104.67  calls  272  tris    97k  tex 66  vis ca tr fi 
+tracking    nodof       38.3 fps  frame  26.14ms  p95   46.7  js 25.11  gpu  73.21  calls  291  tris    97k  tex 96  vis ca tr fi 
+tracking    nomsaa        30 fps  frame  33.34ms  p95   67.7  js 18.14  gpu  99.69  calls  302  tris    97k  tex 98  vis ca tr fi 
+tracking    only          30 fps  frame  33.38ms  p95   77.9  js  28.3  gpu 305.06  calls  162  tris    91k  tex 98  vis tr 
+final       baseline    33.1 fps  frame  30.25ms  p95   58.3  js 29.86  gpu  94.76  calls  335  tris    91k  tex 97  vis tr fi 
+final       dpr15       54.6 fps  frame  18.33ms  p95   34.9  js 17.54  gpu  55.27  calls  335  tris    91k  tex 97  vis tr fi 
+final       dpr1       115.4 fps  frame   8.67ms  p95   15.7  js  8.14  gpu  24.96  calls  335  tris    91k  tex 97  vis tr fi 
+final       nopost     142.7 fps  frame   7.01ms  p95   12.8  js  6.56  gpu  16.72  calls  305  tris    91k  tex 65  vis tr fi 
+final       nodof       43.1 fps  frame  23.19ms  p95   42.7  js 22.06  gpu  73.66  calls  324  tris    91k  tex 89  vis tr fi 
+final       nomsaa      40.5 fps  frame  24.68ms  p95   48.4  js 24.29  gpu  72.99  calls  335  tris    91k  tex 97  vis tr fi 
+final       only          10 fps  frame  99.97ms  p95   60.8  js 30.39  gpu  98.44  calls  231  tris    17k  tex 95  vis fi 
+→ qa/perf/baseline-rest

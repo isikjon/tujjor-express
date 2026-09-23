@@ -22,7 +22,7 @@ export const scroll: ScrollState = { progress: 0, pd: 0, velocity: 0, scrollY: 0
 /* App phase / UI state (React state, changes rarely)                  */
 /* ------------------------------------------------------------------ */
 export type AppPhase = 'loading' | 'intro' | 'live'
-export type QualityTier = 'ultra' | 'high' | 'balanced' | 'low' | 'none'
+export type QualityTier = 'ultra' | 'high' | 'medium' | 'low' | 'none'
 export type CursorMode = 'default' | 'drag' | 'open' | 'explore' | 'hidden'
 export type Locale = 'ru' | 'uz'
 

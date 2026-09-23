@@ -32,6 +32,7 @@ export const uz: Dict = {
     p: 'Tovarni yetkazib beruvchidan qabul qilamiz, tekshiramiz, jamlaymiz va jo‘natishga tayyorlaymiz.',
     hud: ['YUK QABUL QILINDI', 'TEKSHIRILDI', 'JAMLANDI', 'JO‘NATISHGA TAYYOR'],
     items: ['Istalgan yetkazib beruvchidan qabul', 'Foto va to‘liqlik tekshiruvi', 'Bir nechta buyurtmani jamlash'],
+    signs: ['QABUL', 'A ZONA', '→ JO‘NATISH'],
   },
   conveyor: {
     h2: 'Har bir posilka besh bosqichdan o‘tadi',
@@ -81,6 +82,7 @@ export const uz: Dict = {
       business: 'Tijorat partiyalari, hujjatlar, biznes uchun muntazam yetkazib berish.',
       customer: 'Xitoy maydonchalaridan shaxsiy buyurtmalar — bitta posilkadan boshlab.',
     },
+    listLabel: 'Tarmoq tugunlari — tanlang',
   },
   exploded: {
     h2: 'Har bir jo‘natma ichida nima bor',
@@ -113,6 +115,14 @@ export const uz: Dict = {
     copied: 'Parametrlar nusxalandi — ularni xabarga joylashtiring',
     kg: 'kg',
     cm: 'sm',
+    invalid: 'Qiymatlarni tekshiring: o‘lchamlar 1–300 sm, vazn 0.1–1000 kg',
+    tariffHint: 'Tarif mo‘ljali: og‘irlik yoki hajm bo‘yicha — Telegramda tasdiqlaymiz',
+    volume: 'Hajm',
+    density: 'Zichlik',
+    m3: 'm³',
+    kgm3: 'kg/m³',
+    result: 'Natija',
+    template: 'Assalomu alaykum! Yetkazib berishni hisoblamoqchiman: {L}×{W}×{H} sm, {kg} kg, hajm {m3} m³, zichlik {d} kg/m³, toifa {cat}, tur {type}.',
   },
   tracking: {
     h2: 'Yukni kuzatish',
@@ -132,6 +142,12 @@ export const uz: Dict = {
       chirchiq: 'Chirchiq',
       ready: 'Ready for pickup',
     },
+    statusesRu: ['Xitoyda qabul qilindi', 'Omborda', 'Jamlandi', 'Yo‘lda', 'O‘zbekiston', 'Chirchiq', 'Olishga tayyor'],
+    codeLabel: 'Trek-raqam',
+    loading: 'Qidirilmoqda…',
+    invalid: 'Trek-raqamni kiriting — kamida 4 ta belgi',
+    demoNote: 'Marshrut namunasi: yukingiz yo‘li shunday ko‘rinadi',
+    stepsLabel: 'Yetkazish bosqichlari',
   },
   final: {
     h2a: 'Xitoy yaqinroq,',

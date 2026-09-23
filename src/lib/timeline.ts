@@ -53,6 +53,31 @@ export const STAGES: StageDef[] = [
 ]
 export const STAGE_BY_ID = Object.fromEntries(STAGES.map((s) => [s.id, s])) as Record<StageId, StageDef>
 
+/**
+ * RENDER VISIBILITY WINDOWS (p ranges). A scene is rendered (and its useStageFrame runs) only while p is
+ * inside its window — instead of "±1 stage" this keeps 1–2 scenes alive instead of 3. Windows overlap
+ * exactly where the story needs both scenes: box hand-offs, backdrops, cross-fades (±0.004 at boundaries).
+ */
+export const VISIBLE: Record<StageId, [number, number]> = {
+  hero: [0, 0.115], // box/pallet hand-off to the forklift at warehouse t .35 (p .105)
+  warehouse: [0.055, 0.275], // backdrop for the whole conveyor + container door approach
+  conveyor: [0.16, 0.325], // belt end feeds the container
+  container: [0.25, 0.325],
+  globe: [0.32, 0.45], // the tunnel camera passes through the map at tunnel t .17 (p .432)
+  tunnel: [0.405, 0.495],
+  uzbekistan: [0.49, 0.6], // fades out t .8–1 while the city scales in
+  delivery: [0.555, 0.685], // scales from uzbekistan t .8 (p .562)
+  network: [0.675, 0.775],
+  exploded: [0.745, 0.845],
+  calculator: [0.815, 0.915],
+  tracking: [0.885, 0.975],
+  final: [0.945, 1.001],
+}
+export function isVisibleAt(id: StageId, p: number): boolean {
+  const w = VISIBLE[id]
+  return p >= w[0] && p <= w[1]
+}
+
 /** World group X offsets (all worlds live in one scene, far apart). */
 export const WORLD_OFFSET: Record<WorldId, number> = { A: 0, B: 300, C: 600, D: 900, E: 1500 }
 /** Local X offsets of studio stations inside world D. */

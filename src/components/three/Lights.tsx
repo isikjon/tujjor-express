@@ -1,5 +1,5 @@
 'use client'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Environment, Lightformer } from '@react-three/drei'
@@ -9,6 +9,7 @@ import { STAGES, WORLD_OFFSET, stageAt, stageIndex, localT } from '@/lib/timelin
 import { BASE_PRESET, lerp3, lerpColor, liveLights, type LightPreset } from '@/lib/lights'
 import { lightRegistry } from './registry'
 import { useIntroState } from './IntroSequence'
+import { perfOverrides } from '@/lib/perf'
 
 const XFADE = 0.012 // progress window over which presets blend at a (non-cut) boundary
 
@@ -23,10 +24,12 @@ export function Lights() {
   const scene = useThree((s) => s.scene)
   const hemi = useRef<THREE.HemisphereLight>(null!)
   const key = useRef<THREE.DirectionalLight>(null!)
-  const keyTarget = useRef<THREE.Object3D>(null!)
   const spots = useRef<THREE.SpotLight[]>([])
-  const spotTargets = useRef<THREE.Object3D[]>([])
   const points = useRef<THREE.PointLight[]>([])
+  // Light targets MUST be scene-graph children (a bare `attach="target"` object never gets a world matrix,
+  // so every light would aim at the world origin). They are created once and rendered as primitives.
+  const keyTarget = useRef<THREE.Object3D>(useMemo(() => new THREE.Object3D(), []))
+  const spotTargets = useRef<THREE.Object3D[]>(useMemo(() => [0, 1, 2, 3].map(() => new THREE.Object3D()), []))
   const fog = useMemo(() => new THREE.FogExp2(BASE_PRESET.fog.color, BASE_PRESET.fog.density), [])
   const tmp = useMemo(() => ({ v: new THREE.Vector3(), c: new THREE.Color() }), [])
   const introOverride = useIntroState()
@@ -72,11 +75,24 @@ export function Lights() {
     key.current.position.set(tmp.v.x + THREE.MathUtils.lerp(offA, offB, mix), tmp.v.y, tmp.v.z)
     lerp3(a.key.target, b.key.target, mix, tmp.v)
     keyTarget.current.position.set(tmp.v.x + THREE.MathUtils.lerp(offA, offB, mix), tmp.v.y, tmp.v.z)
+    // tight, per-stage shadow frustum (docs: shadow camera bounds optimisation)
+    const sz = THREE.MathUtils.lerp(a.key.shadowSize ?? 22, b.key.shadowSize ?? 22, mix)
+    const far = THREE.MathUtils.lerp(a.key.shadowFar ?? 80, b.key.shadowFar ?? 80, mix)
+    const sc = key.current.shadow.camera
+    if (Math.abs(sc.right - sz) > 0.01 || Math.abs(sc.far - far) > 0.01) {
+      sc.left = -sz
+      sc.right = sz
+      sc.top = sz
+      sc.bottom = -sz
+      sc.far = far
+      sc.updateProjectionMatrix()
+    }
     // spots
     for (let s = 0; s < 4; s++) {
       const L = spots.current[s]
       const T = spotTargets.current[s]
       if (!L || !T) continue
+      L.visible = s < (perfOverrides.spots ?? profile.spots)
       const sa = a.spots[s]
       const sb = b.spots[s]
       L.intensity = THREE.MathUtils.lerp(sa.intensity, sb.intensity, mix) * dim
@@ -93,6 +109,7 @@ export function Lights() {
     for (let s = 0; s < 2; s++) {
       const L = points.current[s]
       if (!L) continue
+      L.visible = s < (perfOverrides.points ?? profile.points)
       const pa = a.points[s]
       const pb = b.points[s]
       L.intensity = THREE.MathUtils.lerp(pa.intensity, pb.intensity, mix) * dim
@@ -102,16 +119,29 @@ export function Lights() {
       L.position.set(tmp.v.x + THREE.MathUtils.lerp(offA, offB, mix), tmp.v.y, tmp.v.z)
     }
     // fog + env + bloom
-    fog.density = THREE.MathUtils.lerp(a.fog.density, b.fog.density, mix)
+    fog.density = perfOverrides.fog === false ? 0 : THREE.MathUtils.lerp(a.fog.density, b.fog.density, mix)
     fog.color.copy(lerpColor(a.fog.color, b.fog.color, mix, tmp.c))
     liveLights.fogDensity = fog.density
     liveLights.fogColor.copy(fog.color)
     liveLights.bloom = THREE.MathUtils.lerp(a.bloom, b.bloom, mix)
-    scene.environmentIntensity = THREE.MathUtils.lerp(a.env, b.env, mix) * dim
+    scene.environmentIntensity = THREE.MathUtils.lerp(a.env, b.env, mix) * dim * (perfOverrides.env ?? 1)
     if (scene.background instanceof THREE.Color) scene.background.copy(fog.color)
   })
 
   const shadowSize = profile.shadowMap
+  // shadow map resolution follows the tier at runtime (dispose the old map so the new size takes effect)
+  useEffect(() => {
+    const l = key.current
+    if (!l) return
+    const size = Math.max(1, shadowSize)
+    if (l.shadow.mapSize.x !== size) {
+      l.shadow.mapSize.set(size, size)
+      l.shadow.map?.dispose()
+      l.shadow.map = null
+      l.shadow.needsUpdate = true
+    }
+    l.castShadow = shadowSize > 0
+  }, [shadowSize])
   return (
     <>
       <hemisphereLight ref={hemi} intensity={0.35} color="#3a3f4b" groundColor="#0b0c0f" />
@@ -129,9 +159,9 @@ export function Lights() {
         shadow-camera-right={22}
         shadow-camera-top={22}
         shadow-camera-bottom={-22}
-      >
-        <object3D ref={keyTarget} attach="target" />
-      </directionalLight>
+        target={keyTarget.current}
+      />
+      <primitive object={keyTarget.current} />
       {[0, 1, 2, 3].map((i) => (
         <spotLight
           key={i}
@@ -143,14 +173,11 @@ export function Lights() {
           penumbra={0.6}
           distance={40}
           decay={1.6}
-        >
-          <object3D
-            ref={(el) => {
-              if (el) spotTargets.current[i] = el
-            }}
-            attach="target"
-          />
-        </spotLight>
+          target={spotTargets.current[i]}
+        />
+      ))}
+      {spotTargets.current.map((t, i) => (
+        <primitive key={`t${i}`} object={t} />
       ))}
       {[0, 1].map((i) => (
         <pointLight

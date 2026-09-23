@@ -1,0 +1,27 @@
+{
+ "base": "http://localhost:3100",
+ "tier": "ultra",
+ "dpr": 1.5,
+ "portrait": false,
+ "seconds": 2,
+ "rows": [
+  {
+   "stage": "container",
+   "config": "only",
+   "fps": 86.6,
+   "frameMs": 11.55,
+   "p95Ms": 22.1,
+   "jsMs": 11.44,
+   "gpuMs": 37.15,
+   "calls": 75,
+   "tris": 6282,
+   "points": 252,
+   "textures": 69,
+   "geometries": 223,
+   "programs": 151,
+   "heapMb": 86,
+   "dpr": 1.5,
+   "visible": "co "
+  }
+ ]
+}

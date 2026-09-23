@@ -1,8 +1,9 @@
 'use client'
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import Lenis from 'lenis'
 import { usePathname } from 'next/navigation'
 import { scroll, useApp } from '@/lib/stores'
+import { scheduler, ticker } from '@/lib/ticker'
 
 const LenisCtx = createContext<Lenis | null>(null)
 export const useLenis = () => useContext(LenisCtx)
@@ -26,7 +27,6 @@ export function LenisProvider({ children }: { children: ReactNode }) {
   const reduced = useApp((s) => s.reducedMotion)
   const isTouch = useApp((s) => s.isTouch)
   const tier = useApp((s) => s.tier)
-  const rafId = useRef(0)
 
   // layout viewport height probe (100lvh) — refreshed only on orientation change / big resizes
   useEffect(() => {
@@ -53,24 +53,22 @@ export function LenisProvider({ children }: { children: ReactNode }) {
   // tier 'none': native scroll, progress from scroll events, pd = p via rAF
   useEffect(() => {
     if (tier !== 'none') return
-    let raf = 0
     const onScroll = () => {
       const lvh = storyPath.lvh || window.innerHeight
       const path = storyPath.el ? Math.max(1, storyPath.el.offsetHeight - lvh) : Math.max(1, document.documentElement.scrollHeight - lvh)
       scroll.scrollY = window.scrollY
       scroll.limit = path
       scroll.progress = Math.min(1, Math.max(0, window.scrollY / path))
+      scheduler.wake(1200)
     }
-    const loop = () => {
+    const off = ticker.add(() => {
       scroll.pd = scroll.progress
-      raf = requestAnimationFrame(loop)
-    }
+    }, 0)
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
-    raf = requestAnimationFrame(loop)
     return () => {
       window.removeEventListener('scroll', onScroll)
-      cancelAnimationFrame(raf)
+      off()
     }
   }, [tier])
 
@@ -88,33 +86,34 @@ export function LenisProvider({ children }: { children: ReactNode }) {
     let ema = 0
     const onScroll = (l: Lenis) => {
       const now = performance.now()
-      const refresh = 60 // normalised below via dt in raf loop
       const lvh = storyPath.lvh || window.innerHeight
       const path = storyPath.el ? Math.max(1, storyPath.el.offsetHeight - lvh) : Math.max(1, l.limit)
       scroll.scrollY = l.scroll
       scroll.limit = path
       if (!useApp.getState().formLock) scroll.progress = Math.min(1, Math.max(0, l.scroll / path))
-      const raw = Math.min(1, Math.max(-1, (l.velocity * (60 / refresh)) / (0.5 * lvh)))
+      // velocity normalised per 60 Hz frame and half a viewport (docs §14.10)
+      const raw = Math.min(1, Math.max(-1, l.velocity / (0.5 * lvh)))
       ema += (raw - ema) * 0.35
       scroll.velocity = ema
       lastEvent = now
+      scheduler.wake(1200)
     }
     instance.on('scroll', onScroll)
-    const raf = (time: number) => {
+    // Lenis is stepped from the single ticker (priority 0 = input)
+    const off = ticker.add((time) => {
       instance.raf(time)
-      // velocity decay when no scroll events arrive
       if (performance.now() - lastEvent > 150) {
         ema *= 0.82
         if (Math.abs(ema) < 0.001) ema = 0
         scroll.velocity = ema
       }
-      rafId.current = requestAnimationFrame(raf)
-    }
-    rafId.current = requestAnimationFrame(raf)
-    setLenis(instance)
+    }, 0)
+    // the instance is published to context on the next tick (an external system, not derived state)
+    const publish = window.setTimeout(() => setLenis(instance), 0)
     onScroll(instance)
     return () => {
-      cancelAnimationFrame(rafId.current)
+      window.clearTimeout(publish)
+      off()
       instance.destroy()
       setLenis(null)
     }

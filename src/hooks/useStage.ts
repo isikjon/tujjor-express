@@ -16,11 +16,12 @@ export function setActiveStages(ids: StageId[]) {
   activeStages.version++
   listeners.forEach((l) => l())
 }
-/** True while `stage` is within ±`pad` stages of the current one. Use to mount <Html> / heavy children. */
-export function useInRange(stage: StageDef, pad = 1): boolean {
+/** True while `stage` is rendered (its visibility window contains p). Use to mount <Html> / heavy children. */
+export function useInRange(stage: StageDef, pad = 0): boolean {
   const idx = stageIndex(stage.id)
   const compute = () => {
-    for (const id of activeStages.set) if (Math.abs(stageIndex(id) - idx) <= pad) return true
+    if (activeStages.set.has(stage.id)) return true
+    if (pad > 0) for (const id of activeStages.set) if (Math.abs(stageIndex(id) - idx) <= pad) return true
     return false
   }
   const [inRange, setInRange] = useState(compute)
@@ -35,7 +36,9 @@ export function useInRange(stage: StageDef, pad = 1): boolean {
   }, [stage.id, pad])
   return inRange
 }
-export function isStageNear(id: StageId, pad = 1): boolean {
+export function isStageNear(id: StageId, pad = 0): boolean {
+  if (activeStages.set.has(id)) return true
+  if (pad <= 0) return false
   const idx = stageIndex(id)
   for (const a of activeStages.set) if (Math.abs(stageIndex(a) - idx) <= pad) return true
   return false
@@ -61,7 +64,7 @@ export interface StageFrame {
 export function useStageFrame(stage: StageDef, cb: (f: StageFrame) => void, priority?: number) {
   const timeRef = useRef(0)
   useFrame((state, dt) => {
-    if (!isStageNear(stage.id, 1)) return
+    if (!isStageNear(stage.id)) return
     const motionOff = useApp.getState().motionOff
     if (!motionOff) timeRef.current += Math.min(dt, 0.05)
     const p = scroll.pd

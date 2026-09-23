@@ -1,0 +1,27 @@
+{
+ "base": "http://localhost:3100",
+ "tier": "ultra",
+ "dpr": 1.5,
+ "portrait": false,
+ "seconds": 2,
+ "rows": [
+  {
+   "stage": "uzbekistan",
+   "config": "only",
+   "fps": 15.6,
+   "frameMs": 63.92,
+   "p95Ms": 47.1,
+   "jsMs": 21.34,
+   "gpuMs": 79.99,
+   "calls": 76,
+   "tris": 34228,
+   "points": 396,
+   "textures": 67,
+   "geometries": 266,
+   "programs": 146,
+   "heapMb": 92,
+   "dpr": 1.5,
+   "visible": "uz "
+  }
+ ]
+}

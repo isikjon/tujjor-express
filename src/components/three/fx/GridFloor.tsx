@@ -1,8 +1,9 @@
 'use client'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { useApp } from '@/lib/stores'
+import { isRenderedInTree } from '@/lib/visibility'
 
 const vert = /* glsl */ `
 varying vec2 vUv;
@@ -67,8 +68,9 @@ export function GridFloor({ size = 120, cell = 1, fade = 40, color = '#2a2f3a', 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   )
+  useEffect(() => () => material.dispose(), [material])
   useFrame((_, dt) => {
-    if (!mesh.current.visible) return
+    if (!isRenderedInTree(mesh.current)) return
     if (!useApp.getState().motionOff) material.uniforms.uTime.value += Math.min(dt, 0.05)
     material.uniforms.uOpacity.value = opacity
     mesh.current.getWorldPosition(material.uniforms.uCenter.value)

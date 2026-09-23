@@ -8,6 +8,7 @@ import { useScrollToStage } from '@/hooks/useScrollTo'
 import { MagneticButton } from '@/components/ui/MagneticButton'
 import { TelegramIcon } from '@/components/ui/Header'
 import { StageSection } from './StageSection'
+import { ticker } from '@/lib/ticker'
 
 /** Hero copy is SSR'd and visible immediately (LCP) — it fades with the intro hand-off. */
 export function HeroCopy() {
@@ -43,23 +44,24 @@ export function HeroCopy() {
   useEffect(() => {
     const el = hint.current
     if (!el) return
-    let raf = 0
     let idleSince = performance.now()
     let touched = false
     let lastP = 0
+    let lastShow = ''
     const onTouch = () => (touched = true)
     window.addEventListener('touchstart', onTouch, { passive: true, once: true })
-    const loop = () => {
+    const off = ticker.add(() => {
       const p = scroll.pd
       if (Math.abs(p - lastP) > 0.0005) idleSince = performance.now()
       lastP = p
-      const show = p < 0.02 && (performance.now() - idleSince > 6000 || p < 0.005) && !(isTouch && touched)
-      el.style.opacity = show ? '1' : '0'
-      raf = requestAnimationFrame(loop)
-    }
-    raf = requestAnimationFrame(loop)
+      const show = p < 0.02 && (performance.now() - idleSince > 6000 || p < 0.005) && !(isTouch && touched) ? '1' : '0'
+      if (show !== lastShow) {
+        lastShow = show
+        el.style.opacity = show
+      }
+    }, 20)
     return () => {
-      cancelAnimationFrame(raf)
+      off()
       window.removeEventListener('touchstart', onTouch)
     }
   }, [isTouch])

@@ -2,14 +2,22 @@ import { keyframes, type CameraFn } from '@/lib/camera'
 import { mkPreset, type LightPreset } from '@/lib/lights'
 
 /** docs §01 — push-in → slow crane pull-out. Local space of world A. */
-export const cameraAt: CameraFn = keyframes([
+const base = keyframes([
   { t: 0, pose: { position: [0, 1.4, 4.2], target: [0, 0.9, 0], fov: 34 } },
   { t: 1, pose: { position: [-1.2, 2.4, 7.5], target: [0, 0.6, 0], fov: 40 } },
 ])
+/** On wide screens the copy sits left, so the box is framed right of centre (offset fades to 0 by t=1 to keep the boundary pose). */
+export const cameraAt: CameraFn = (t, ctx) => {
+  const pose = base(t)
+  const wide = !ctx.isPortrait && ctx.aspect > 1.25
+  const dx = wide ? -1.15 * (1 - t) : 0
+  return { ...pose, position: [pose.position[0] + dx, pose.position[1], pose.position[2]], target: [pose.target[0] + dx, pose.target[1], pose.target[2]] }
+}
 
 export const lights: LightPreset = mkPreset({
   hemi: { sky: '#2a2f3a', ground: '#07080a', intensity: 0.25 },
-  key: { position: [3.5, 5, 4], target: [0, 0.6, 0], intensity: 2.6, color: '#fff1e0' },
+  // shadowSize 6: only the box + pallet cast, both within a few units of the target (default frustum was 22)
+  key: { position: [3.5, 5, 4], target: [0, 0.6, 0], intensity: 2.6, color: '#fff1e0', shadowSize: 6, shadowFar: 30 },
   spots: [
     { position: [-4, 4, 2], target: [0, 0.5, 0], intensity: 6, color: '#ff8a2a', angle: 0.5, penumbra: 0.9, distance: 18 },
     { position: [0, 10, 0], target: [0, 0, 0], intensity: 0 },

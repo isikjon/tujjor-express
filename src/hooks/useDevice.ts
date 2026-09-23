@@ -14,12 +14,18 @@ export function useDeviceDetection() {
       const h = window.innerHeight
       const reduced = prefersReducedMotion()
       const q = new URLSearchParams(window.location.search)
+      let sessionMotion: string | null = null
+      try {
+        sessionMotion = sessionStorage.getItem('tj_motion')
+      } catch {
+        /* ignore */
+      }
       setDevice({
         isMobile: isMobileUA() || (isTouchDevice() && w < 900),
         isPortrait: h > w,
         isTouch: isTouchDevice(),
         reducedMotion: reduced,
-        motionOff: reduced || q.get('motion') === 'off',
+        motionOff: sessionMotion ? sessionMotion === 'off' : reduced || q.get('motion') === 'off',
       })
     }
     update()

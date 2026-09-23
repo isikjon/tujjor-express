@@ -27,8 +27,9 @@ export function Preloader() {
   const bar = useRef<HTMLDivElement>(null)
   const started = useRef<number>(0)
   const shown = useRef(0)
-  const fading = useRef(false)
+  const [fading, setFading] = useState(false)
   const [gone, setGone] = useState(false)
+  const fadingRef = useRef(false)
 
   useEffect(() => {
     started.current = performance.now()
@@ -61,24 +62,10 @@ export function Preloader() {
     })
   }, [target, phase])
 
-  // Completion: everything ready + minimum time
-  useEffect(() => {
-    if (phase !== 'loading') return
-    const done = fonts === 1 && scenesReady >= 1 && firstFrame === 1
-    if (!done) {
-      // Safety net: never trap the user — after 9 s continue regardless.
-      const id = window.setTimeout(() => finish(), 9000)
-      return () => window.clearTimeout(id)
-    }
-    const elapsed = performance.now() - started.current
-    const id = window.setTimeout(finish, Math.max(0, MIN_MS - elapsed))
-    return () => window.clearTimeout(id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fonts, scenesReady, firstFrame, phase])
-
   function finish() {
-    if (useApp.getState().phase !== 'loading' || fading.current) return
-    fading.current = true
+    if (useApp.getState().phase !== 'loading' || fadingRef.current) return
+    fadingRef.current = true
+    setFading(true)
     const el = root.current
     const next = reduced || useApp.getState().route !== '/' ? 'live' : 'intro'
     if (!el) return setPhase(next)
@@ -99,8 +86,23 @@ export function Preloader() {
     })
   }
 
+  // Completion: everything ready + minimum time
+  useEffect(() => {
+    if (phase !== 'loading') return
+    const done = fonts === 1 && scenesReady >= 1 && firstFrame === 1
+    if (!done) {
+      // Safety net: never trap the user — after 9 s continue regardless.
+      const id = window.setTimeout(() => finish(), 9000)
+      return () => window.clearTimeout(id)
+    }
+    const elapsed = performance.now() - started.current
+    const id = window.setTimeout(finish, Math.max(0, MIN_MS - elapsed))
+    return () => window.clearTimeout(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fonts, scenesReady, firstFrame, phase])
+
   // Never show the loader again once the app is live (HMR / client navigation remounts included)
-  if (gone || (phase !== 'loading' && !fading.current)) return null
+  if (gone || (phase !== 'loading' && !fading)) return null
   return (
     <div
       ref={root}

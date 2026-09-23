@@ -1,25 +1,25 @@
 'use client'
 import { useEffect, useRef } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePath } from '@/hooks/usePath'
 import { COMPANY } from '@/config/company'
 import { scroll, useApp } from '@/lib/stores'
 import { useT } from '@/translations'
 import { useScrollToStage } from '@/hooks/useScrollTo'
+import { ticker } from '@/lib/ticker'
 import { TelegramIcon } from './Header'
 
 /** Persistent conversion bar on narrow layouts while the story is between hero and calculator (p .07–.83). */
 export function MobileCtaBar() {
   const t = useT()
-  const pathname = usePathname()
+  const pathname = usePath()
   const phase = useApp((s) => s.phase)
   const isMobile = useApp((s) => s.isMobile)
   const scrollTo = useScrollToStage()
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!isMobile) return
-    let raf = 0
     let last = ''
-    const loop = () => {
+    return ticker.add(() => {
       const p = scroll.pd
       const show = pathname === '/' && phase === 'live' && p > 0.07 && p < 0.83 && !useApp.getState().formLock
       const v = show ? '1' : '0'
@@ -27,10 +27,7 @@ export function MobileCtaBar() {
         ref.current.dataset.show = v
         last = v
       }
-      raf = requestAnimationFrame(loop)
-    }
-    raf = requestAnimationFrame(loop)
-    return () => cancelAnimationFrame(raf)
+    }, 20)
   }, [isMobile, pathname, phase])
   if (!isMobile) return null
   return (

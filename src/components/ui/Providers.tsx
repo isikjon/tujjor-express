@@ -4,6 +4,7 @@ import { LenisProvider } from '@/hooks/useLenis'
 import { useDeviceDetection } from '@/hooks/useDevice'
 import { useSoundEngine } from '@/hooks/useSound'
 import { scroll, useApp, useCalc, useTracking, useNetwork } from '@/lib/stores'
+import { PERF_ENABLED } from '@/lib/perf'
 
 function Boot() {
   useDeviceDetection()
@@ -19,7 +20,10 @@ function Boot() {
     }
   }, [setSoundOn])
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'production') (window as unknown as { __tj: unknown }).__tj = { useApp, scroll, useCalc, useTracking, useNetwork }
+    if (PERF_ENABLED) {
+      const w = window as unknown as { __tj?: Record<string, unknown> }
+      w.__tj = Object.assign(w.__tj || {}, { useApp, scroll, useCalc, useTracking, useNetwork })
+    }
   }, [])
   // no WebGL → nothing to preload
   useEffect(() => {

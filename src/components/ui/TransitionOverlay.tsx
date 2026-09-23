@@ -5,6 +5,7 @@ import gsap from 'gsap'
 import { scroll, useApp } from '@/lib/stores'
 import { STAGE_BY_ID, maskOpacity } from '@/lib/timeline'
 import { TRANSITION_MS } from './TransitionLink'
+import { ticker } from '@/lib/ticker'
 
 /**
  * Full-screen HTML masks used by the story and by page transitions:
@@ -24,7 +25,7 @@ export function TransitionOverlay() {
 
   // Story masks driven by scroll progress
   useEffect(() => {
-    let raf = 0
+    const lastVals = { b: -1, f: -1, m: -1 }
     const c = STAGE_BY_ID.container
     const tn = STAGE_BY_ID.tunnel
     const d = STAGE_BY_ID.delivery
@@ -35,22 +36,17 @@ export function TransitionOverlay() {
       const b = home ? Math.max(maskOpacity(p, c.end), p > c.end && p < c.end + 0.05 ? gate : 0) : 0
       const f = home ? Math.max(maskOpacity(p, tn.end), p > tn.end && p < tn.end + 0.05 ? gate : 0) : 0
       const m = home ? Math.max(0, 1 - Math.abs(p - d.end) / 0.003) : 0
-      if (black.current) {
-        black.current.style.opacity = b.toFixed(3)
-        black.current.style.visibility = b > 0.001 ? 'visible' : 'hidden'
+      const apply = (el: HTMLDivElement | null, v: number, key: 'b' | 'f' | 'm') => {
+        if (!el || Math.abs(v - lastVals[key]) < 0.002) return
+        lastVals[key] = v
+        el.style.opacity = v.toFixed(3)
+        el.style.visibility = v > 0.001 ? 'visible' : 'hidden'
       }
-      if (flash.current) {
-        flash.current.style.opacity = f.toFixed(3)
-        flash.current.style.visibility = f > 0.001 ? 'visible' : 'hidden'
-      }
-      if (line.current) {
-        line.current.style.opacity = m.toFixed(3)
-        line.current.style.visibility = m > 0.001 ? 'visible' : 'hidden'
-      }
-      raf = requestAnimationFrame(loop)
+      apply(black.current, b, 'b')
+      apply(flash.current, f, 'f')
+      apply(line.current, m, 'm')
     }
-    raf = requestAnimationFrame(loop)
-    return () => cancelAnimationFrame(raf)
+    return ticker.add(loop, 20)
   }, [])
 
   // Page transition cover

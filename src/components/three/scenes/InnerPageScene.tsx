@@ -29,7 +29,7 @@ export function InnerPageScene() {
   const visible = route !== '/'
   return (
     <group position={[WORLD_OFFSET.E, 0, 0]} visible={visible}>
-      <TujjorBox ref={box} position={[0, 0.6, 0]} rotation={[0, 0.4, 0]} />
+      <TujjorBox ref={box} mode="static" position={[0, 0.6, 0]} rotation={[0, 0.4, 0]} />
       <GridFloor size={80} cell={1} fade={22} opacity={0.7} />
       {PROFILES[tier].contactShadows && <ContactShadows position={[0, 0.001, 0]} opacity={0.6} scale={8} blur={2.4} far={2} frames={1} color="#000000" />}
       <Particles count={400} spread={[14, 8, 14]} color="#ffb27a" size={0.9} opacity={0.5} seed={77} />

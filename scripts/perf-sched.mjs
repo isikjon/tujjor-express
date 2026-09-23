@@ -1,0 +1,22 @@
+import puppeteer from 'puppeteer-core'
+const browser = await puppeteer.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: true, args: ['--use-angle=metal', '--enable-gpu', '--ignore-gpu-blocklist', '--no-sandbox'] })
+const page = await browser.newPage()
+await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 2 })
+page.on('pageerror', (e) => console.error('[pageerror]', e.message))
+await page.goto(process.argv[2] + '/?debug=1', { waitUntil: 'domcontentloaded', timeout: 120000 })
+await page.waitForFunction(() => window.__tj && window.__tj.useApp.getState().phase === 'live' && window.__tj.perf, { timeout: 120000 })
+await new Promise((r) => setTimeout(r, 2500))
+const read = async (label, ms) => {
+  await page.evaluate(() => window.__tj.perf.reset())
+  await new Promise((r) => setTimeout(r, ms))
+  const s = await page.evaluate(() => ({ ...window.__tj.perf.stats(), sched: window.__tj.perf.scheduler.debug(), p: window.__tj.scroll.progress, pd: window.__tj.scroll.pd, v: window.__tj.scroll.velocity }))
+  console.log(label.padEnd(10), `fps ${s.fps.toFixed(1)} frame ${s.raf.avg.toFixed(1)}ms rendered ${s.rendered} skipped ${s.skipped} calls ${s.calls} tris ${s.tris} dpr ${s.dpr} tier ${s.tier} vis ${s.visibleStages} sched ${JSON.stringify(s.sched)} p ${s.p.toFixed(5)} pd ${s.pd.toFixed(5)} v ${s.v.toFixed(4)}`)
+}
+await read('idle', 3000)
+await page.mouse.move(300, 300)
+await page.mouse.move(600, 400, { steps: 20 })
+await read('pointer', 800)
+await page.evaluate(() => { const s = window.__tj.scroll; window.scrollTo(0, 0.12 * s.limit) })
+await read('scroll', 1500)
+await read('idle2', 3000)
+await browser.close()

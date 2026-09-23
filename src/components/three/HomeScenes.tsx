@@ -3,11 +3,12 @@ import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
 import { scroll, useApp } from '@/lib/stores'
-import { STAGES, WORLD_OFFSET, stageAt, stageIndex, type StageDef, type StageId, type WorldId } from '@/lib/timeline'
+import { STAGES, WORLD_OFFSET, isVisibleAt, stageAt, type StageDef, type StageId, type WorldId } from '@/lib/timeline'
 import { adaptPose, offsetPose, type CameraCtx } from '@/lib/camera'
 import { loadScene, moduleRegistry, cameraRegistry } from './registry'
 import { setActiveStages } from '@/hooks/useStage'
 import type { SceneModule } from './scenes/types'
+import { perfLive, perfOverrides } from '@/lib/perf'
 
 const WORLDS: WorldId[] = ['A', 'B', 'C', 'D']
 const stagesOf = (w: WorldId) => STAGES.filter((s) => s.world === w)
@@ -107,28 +108,38 @@ export function HomeScenes() {
   const lastActive = useRef('')
   useFrame(() => {
     const p = scroll.pd
-    const cur = stageAt(p)
-    const ci = stageIndex(cur.id)
+    const home = useApp.getState().route === '/'
+    const only = perfOverrides.onlyStage
+    // active = rendered: scenes whose visibility window contains p (docs: never render off-screen scenes)
     const ids: StageId[] = []
-    for (let i = Math.max(0, ci - 1); i <= Math.min(STAGES.length - 1, ci + 1); i++) ids.push(STAGES[i].id)
+    for (const s of STAGES) if (only ? s.id === only : isVisibleAt(s.id, p)) ids.push(s.id)
+    if (!ids.length) ids.push(stageAt(p).id)
     const key = ids.join(',')
     if (key !== lastActive.current) {
       lastActive.current = key
       setActiveStages(ids)
     }
-    const home = useApp.getState().route === '/'
+    let visList = ''
     for (const s of STAGES) {
       const g = groups.current[s.id]
       if (!g) continue
-      const vis = home && Math.abs(stageIndex(s.id) - ci) <= 1
-      if (g.visible !== vis) g.visible = vis
+      const vis = home && ids.includes(s.id)
+      if (g.visible !== vis) {
+        g.visible = vis
+        // hidden subtrees are skipped by updateMatrixWorld too (thousands of static objects otherwise cost CPU every frame)
+        g.matrixWorldAutoUpdate = vis
+        if (vis) g.updateMatrixWorld(true)
+      }
+      if (vis) visList += s.id[0] + s.id[1] + ' '
     }
+    perfLive.visibleStages = visList
     // cut gate: if we are just past a cut and the destination world is not ready, keep the mask up
     const app = useApp.getState()
     let gate = 0
-    for (const s of STAGES) {
+    for (let i = 0; i < STAGES.length; i++) {
+      const s = STAGES[i]
       if (!s.cutAtEnd) continue
-      const next = STAGES[stageIndex(s.id) + 1]
+      const next = STAGES[i + 1]
       if (next && p >= s.end && p < s.end + 0.05 && !app.readyWorlds.has(next.world)) gate = 1
     }
     if (gate !== app.cutGate) app.setCutGate(gate)

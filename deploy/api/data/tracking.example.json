@@ -1,0 +1,12 @@
+{
+  "_comment": "Rename to tracking.json. Keys = tracking codes (A-Z, 0-9, dash). status/history.status ∈ received | warehouse | consolidated | transit | uzbekistan | chirchiq | ready. `at` = ISO 8601 date.",
+  "TJ-0000-EXAMPLE": {
+    "status": "transit",
+    "history": [
+      { "status": "received", "at": "2026-09-01T10:00:00+05:00" },
+      { "status": "warehouse", "at": "2026-09-02T09:30:00+05:00" },
+      { "status": "consolidated", "at": "2026-09-04T18:00:00+05:00" },
+      { "status": "transit", "at": "2026-09-05T08:00:00+05:00" }
+    ]
+  }
+}

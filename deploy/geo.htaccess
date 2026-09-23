@@ -1,0 +1,6 @@
+# Map data is versioned with the build — cache for a year.
+<IfModule mod_headers.c>
+  <FilesMatch "\.json$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>

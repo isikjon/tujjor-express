@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# static export / packaging
+/dist/
+/.static-export-tmp/
+
+# QA screenshot sweeps (regenerate with `npm run qa:shots`) — reports in qa/perf are kept
+/qa/shots-*/

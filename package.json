@@ -11,7 +11,14 @@
     "optimize:glb": "gltf-transform optimize --compress draco --texture-compress ktx2",
     "postinstall": "node scripts/copy-decoders.mjs && node scripts/gen-geo.mjs",
     "gen:geo": "node scripts/gen-geo.mjs",
-    "check:camera": "tsx scripts/check-camera.mts"
+    "check:camera": "tsx scripts/check-camera.mts",
+    "qa:shots": "node scripts/qa-screens.mjs",
+    "build:perf": "NEXT_PUBLIC_PERF_HUD=1 next build",
+    "start:perf": "next start -p 3200",
+    "perf:profile": "node scripts/perf-profile.mjs",
+    "build:static": "STATIC_EXPORT=1 next build",
+    "package:static": "node scripts/package-static.mjs",
+    "serve:static": "php -S 127.0.0.1:8090 -t out deploy/dev-router.php"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
@@ -27,6 +34,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "three": "^0.186.0",
+    "three-stdlib": "^2.36.1",
     "topojson-client": "^3.1.0",
     "world-atlas": "^2.0.2",
     "zustand": "^5.0.15"
@@ -43,6 +51,7 @@
     "@types/topojson-specification": "^1.0.5",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
+    "puppeteer-core": "^25.11.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5"

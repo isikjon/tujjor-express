@@ -1,0 +1,90 @@
+# Tujjor Express Chirchiq — static Next.js export on Apache / LiteSpeed shared hosting.
+# Upload the contents of the zip into the site root (public_html / www / htdocs).
+# Pages live in folders (services/index.html); only /api/track/* needs mod_rewrite.
+
+AddDefaultCharset utf-8
+<IfModule mod_dir.c>
+  DirectoryIndex index.html
+</IfModule>
+# no directory listings (a directory without index.html answers 403/404 either way)
+<IfModule mod_autoindex.c>
+  IndexIgnore *
+</IfModule>
+
+# ---- MIME types (3D assets, decoders, fonts, manifest) --------------------------------------
+<IfModule mod_mime.c>
+  AddType application/wasm            .wasm
+  AddType model/gltf-binary           .glb
+  AddType model/gltf+json             .gltf
+  AddType image/ktx2                  .ktx2
+  AddType font/woff2                  .woff2
+  AddType font/woff                   .woff
+  AddType application/manifest+json   .webmanifest
+  AddType application/json            .json
+  AddType image/svg+xml               .svg
+  AddType image/avif                  .avif
+  AddType image/webp                  .webp
+  # the Open Graph image is exported without an extension
+  <Files "opengraph-image">
+    ForceType image/png
+  </Files>
+</IfModule>
+
+# ---- Routing --------------------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Tracking API: /api/track/CODE  →  api/track.php?code=CODE
+  RewriteRule ^api/track/([A-Za-z0-9-]{1,40})/?$ api/track.php?code=$1 [L,QSA,NC]
+
+  # Pages are exported as folders (services/index.html) — served natively; /services → /services/
+  # is the ordinary directory redirect. Unknown paths fall through to ErrorDocument 404.
+</IfModule>
+
+ErrorDocument 404 /404.html
+
+# Deployment notes are not a web page
+<Files "README-HOSTING.txt">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</Files>
+
+# ---- Force HTTPS (uncomment after SSL is enabled on the hosting) ----------------------------
+# <IfModule mod_rewrite.c>
+#   RewriteEngine On
+#   RewriteCond %{HTTPS} !=on
+#   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+# </IfModule>
+
+# ---- Caching --------------------------------------------------------------------------------
+# Hashed build output, fonts, decoders and map data are immutable; HTML / RSC payloads / XML revalidate.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|css|woff|woff2|wasm|glb|gltf|ktx2|png|jpg|jpeg|webp|avif|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(html|txt|xml|webmanifest)$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "\.php$">
+    Header set Cache-Control "no-store"
+  </FilesMatch>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ---- Compression ----------------------------------------------------------------------------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml image/svg+xml
+  AddOutputFilterByType DEFLATE application/javascript application/x-javascript application/json
+  AddOutputFilterByType DEFLATE application/manifest+json application/wasm model/gltf+json
+</IfModule>
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml image/svg+xml
+  AddOutputFilterByType BROTLI_COMPRESS application/javascript application/json application/manifest+json application/wasm
+</IfModule>
